@@ -36,7 +36,6 @@ namespace MongoDB.Entities.Tests
         {
             var author = new Author { Name = "test" };
             await author.SaveAsync();
-
             var res = (await DB.Find<Author, DateTime>()
                         .Match(a => a.Id == author.Id)
                         .Project(a => a.CreatedOn)
@@ -531,10 +530,10 @@ namespace MongoDB.Entities.Tests
         [TestMethod]
         public async Task custom_id_generation_logic_works()
         {
-            var customer = new CustomerWithCustomID();
+            var customer = new CustomerWithCustomId();
             await customer.SaveAsync();
 
-            var res = await DB.Find<CustomerWithCustomID>().OneAsync(customer.Id);
+            var res = await DB.Find<CustomerWithCustomId>().OneAsync(customer.Id);
 
             Assert.AreEqual(res.Id, customer.Id);
         }
@@ -542,7 +541,7 @@ namespace MongoDB.Entities.Tests
         [TestMethod]
         public async Task custom_id_used_in_a_relationship()
         {
-            var customer = new CustomerWithCustomID();
+            var customer = new CustomerWithCustomId();
             await customer.SaveAsync();
 
             var book = new Book { Title = "ciuiar", Customer = customer };

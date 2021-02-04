@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver;
 
 namespace MongoDB.Entities
 {
@@ -8,6 +9,8 @@ namespace MongoDB.Entities
     {
         [BsonId]
         public string Id { get; set; }
+
+        IClientSessionHandle IEntity.Session { get; set; }
 
         [BsonRepresentation(BsonType.Int64)]
         public ulong Count { get; set; }

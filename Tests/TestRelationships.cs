@@ -374,7 +374,7 @@ namespace MongoDB.Entities.Tests
         [TestMethod]
         public async Task relationships_with_custom_id()
         {
-            var customer = new CustomerWithCustomID();
+            var customer = new CustomerWithCustomId();
             await customer.SaveAsync();
 
             var flower = new Flower() { Name = customer.Id };

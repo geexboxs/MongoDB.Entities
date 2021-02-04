@@ -4,7 +4,7 @@
     {
         public string Name { get; set; }
         public string Color { get; set; }
-        public Many<CustomerWithCustomID> Customers { get; set; }
+        public Many<CustomerWithCustomId> Customers { get; set; }
 
         public Flower()
         {

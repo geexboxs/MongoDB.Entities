@@ -1,6 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using MongoDB.Driver;
+
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MongoDB.Entities.Tests
@@ -72,11 +75,13 @@ namespace MongoDB.Entities.Tests
 
             using (var TN = new DbContext())
             {
-                await TN.SaveAsync(book1);
-                await TN.SaveAsync(book2);
+                TN.AttachContextSession(book1);
+                TN.AttachContextSession(book2);
+                await book1.SaveAsync();
+                await book2.SaveAsync();
 
                 res = await TN.Find<Book>().OneAsync(book1.Id);
-                res = book1.Fluent(TN.session).Match(f => f.Eq(b => b.Id, book1.Id)).SingleOrDefault();
+                res = book1.Fluent().Match(f => f.Eq(b => b.Id, book1.Id)).SingleOrDefault();
                 fnt = TN.Fluent<Book>().FirstOrDefault();
                 fnt = TN.Fluent<Book>().Match(b => b.Id == book2.Id).SingleOrDefault();
                 fnt = TN.Fluent<Book>().Match(f => f.Eq(b => b.Id, book2.Id)).SingleOrDefault();
@@ -95,7 +100,7 @@ namespace MongoDB.Entities.Tests
             var book1 = new Book { Title = "caftrcd1" };
             await book1.SaveAsync();
 
-            using (var TN = new DbContext(transactional:true))
+            using (var TN = new DbContext(transactional: true))
             {
                 await TN.DeleteAsync<Book>(book1.Id);
                 await TN.CommitAsync();
@@ -139,7 +144,8 @@ namespace MongoDB.Entities.Tests
 
             using (var TN = new DbContext())
             {
-                await TN.SaveAsync(entities);
+                TN.AttachContextSession(entities);
+                await entities.SaveAsync();
                 await TN.CommitAsync();
             }
 
@@ -155,6 +161,64 @@ namespace MongoDB.Entities.Tests
             res = await DB.Find<Book>().ManyAsync(b => b.Title.Contains(guid));
             Assert.AreEqual(3, res.Count);
             Assert.AreEqual("updated " + guid, res[0].Title);
+        }
+
+        [TestMethod]
+        public async Task find_outcome_entities_are_attached_to_session()
+        {
+            var guid = Guid.NewGuid().ToString();
+            var guid1 = Guid.NewGuid().ToString();
+
+            var entities = new[] {
+                new Book{Title="one "+guid},
+                new Book{Title="two "+guid},
+                new Book{Title="thr "+guid}
+            };
+
+            using (var TN = new DbContext())
+            {
+                TN.AttachContextSession(entities);
+                await entities.SaveAsync();
+                await TN.CommitAsync();
+            }
+
+            var res = await DB.Find<Book>().ManyAsync(b => b.Title.Contains(guid));
+            Assert.AreEqual(3, res.Count);
+            using (var db = new DbContext())
+            {
+                res = await db.Find<Book>().ManyAsync(b => b.Title.Contains(guid));
+                Assert.AreEqual(entities.Length, res.Count);
+
+                foreach (var ent in res)
+                {
+                    ent.Title = "updated " + guid1;
+                }
+                await res.SaveAsync();
+                await db.AbortAsync();
+            }
+            res = await DB.Find<Book>().ManyAsync(b => b.Title.Contains(guid1));
+            Assert.AreEqual(0,res.Count);
+            using (var db = new DbContext())
+            {
+                res = await db.Find<Book>().ManyAsync(b => b.Title.Contains(guid));
+                Assert.AreEqual(entities.Length, res.Count);
+
+                foreach (var ent in res)
+                {
+                    ent.Title = "updated " + guid1;
+                }
+                await res.SaveAsync();
+                await db.CommitAsync();
+            }
+            res = await DB.Find<Book>().ManyAsync(b => b.Title.Contains(guid1));
+            Assert.AreEqual(3, res.Count);
+            Assert.AreEqual("updated " + guid1, res[0].Title);
+
+            //await db.CommitAsync();
+            //res = await DB.Find<Book>().ManyAsync(b => b.Title.Contains(guid1));
+            //Assert.AreEqual(3, res.Count);
+            //Assert.AreEqual("updated " + guid1, res[0].Title);
+
         }
     }
 }

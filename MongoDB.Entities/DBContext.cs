@@ -30,7 +30,7 @@ namespace MongoDB.Entities
         /// <param name="database">The name of the database to use for this transaction. default db is used if not specified</param>
         /// <param name="transactional"></param>
         /// <param name="options">Client session options for this transaction</param>
-        public DbContext(string database = default,bool transactional = false, ClientSessionOptions options = null)
+        public DbContext(string database = default, bool transactional = false, ClientSessionOptions options = null)
         {
             session = DB.Database(database).Client.StartSession(options);
             Session.StartTransaction();
@@ -46,6 +46,11 @@ namespace MongoDB.Entities
             CancellationToken cancellation = default) where T : IEntity
         {
             return DB.CountAsync(expression, session, cancellation);
+        }
+
+        public virtual void AttachContextSession(IEntity entity)
+        {
+            this.session?.Attach(entity);
         }
 
         /// <summary>
@@ -235,32 +240,6 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves a complete entity replacing an existing entity or creating a new one if it does not exist. 
-        /// If Id value is null, a new entity is created. If Id has a value, then existing entity is replaced.
-        /// </summary>
-        /// <typeparam name="T">The type of entity</typeparam>
-        /// <param name="entity">The instance to persist</param>
-        /// <param name="cancellation">And optional cancellation token</param>
-        public virtual Task<ReplaceOneResult> SaveAsync<T>(T entity, CancellationToken cancellation = default)
-            where T : IEntity
-        {
-            return DB.SaveAsync(entity, session, cancellation);
-        }
-
-        /// <summary>
-        /// Saves a batch of complete entities replacing an existing entities or creating a new ones if they do not exist. 
-        /// If Id value is null, a new entity is created. If Id has a value, then existing entity is replaced.
-        /// </summary>
-        /// <typeparam name="T">The type of entity</typeparam>
-        /// <param name="entities">The entities to persist</param>
-        /// <param name="cancellation">And optional cancellation token</param>
-        public virtual Task<BulkWriteResult<T>> SaveAsync<T>(IEnumerable<T> entities,
-            CancellationToken cancellation = default) where T : IEntity
-        {
-            return DB.SaveAsync(entities, session, cancellation);
-        }
-
-        /// <summary>
         /// Saves an entity partially with only the specified subset of properties. 
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is updated.
         /// <para>TIP: The properties to be saved can be specified with a 'New' expression. 
@@ -432,5 +411,13 @@ namespace MongoDB.Entities
         }
 
         #endregion
+
+        public void AttachContextSession(IEnumerable<IEntity> entities)
+        {
+            foreach (var entity in entities)
+            {
+                entity.Session = this.Session;
+            }
+        }
     }
 }

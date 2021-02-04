@@ -112,9 +112,9 @@ namespace MongoDB.Entities
         /// <typeparam name="T"></typeparam>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="options">The options for the aggregation. This is not required.</param>
-        public static IAggregateFluent<T> Fluent<T>(this T _, IClientSessionHandle session = null, AggregateOptions options = null) where T : IEntity
+        public static IAggregateFluent<T> Fluent<T>(this T _, AggregateOptions options = null) where T : IEntity
         {
-            return DB.Fluent<T>(options, session);
+            return DB.Fluent<T>(options, _.Session);
         }
 
         /// <summary>
@@ -213,9 +213,9 @@ namespace MongoDB.Entities
         /// </summary>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public static Task<ReplaceOneResult> SaveAsync<T>(this T entity, IClientSessionHandle session = null, CancellationToken cancellation = default) where T : IEntity
+        public static Task<ReplaceOneResult> SaveAsync<T>(this T entity, CancellationToken cancellation = default) where T : IEntity
         {
-            return DB.SaveAsync(entity, session, cancellation);
+            return DB.SaveAsync(entity, entity.Session, cancellation);
         }
 
         /// <summary>
@@ -224,9 +224,10 @@ namespace MongoDB.Entities
         /// </summary>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public static Task<BulkWriteResult<T>> SaveAsync<T>(this IEnumerable<T> entities, IClientSessionHandle session = null, CancellationToken cancellation = default) where T : IEntity
+        public static Task<BulkWriteResult<T>> SaveAsync<T>(this IEnumerable<T> entities, CancellationToken cancellation = default) where T : IEntity
         {
-            return DB.SaveAsync(entities, session, cancellation);
+            var enumerable = entities.ToList();
+            return DB.SaveAsync(enumerable, enumerable.FirstOrDefault()?.Session, cancellation);
         }
 
         /// <summary>
@@ -240,9 +241,9 @@ namespace MongoDB.Entities
         /// <param name="members">x => new { x.PropOne, x.PropTwo }</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public static Task<UpdateResult> SaveOnlyAsync<T>(this T entity, Expression<Func<T, object>> members, IClientSessionHandle session = null, CancellationToken cancellation = default) where T : IEntity
+        public static Task<UpdateResult> SaveOnlyAsync<T>(this T entity, Expression<Func<T, object>> members, CancellationToken cancellation = default) where T : IEntity
         {
-            return DB.SaveOnlyAsync(entity, members, session, cancellation);
+            return DB.SaveOnlyAsync(entity, members, entity.Session, cancellation);
         }
 
         /// <summary>
@@ -256,9 +257,10 @@ namespace MongoDB.Entities
         /// <param name="members">x => new { x.PropOne, x.PropTwo }</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public static Task<BulkWriteResult<T>> SaveOnlyAsync<T>(this IEnumerable<T> entities, Expression<Func<T, object>> members, IClientSessionHandle session = null, CancellationToken cancellation = default) where T : IEntity
+        public static Task<BulkWriteResult<T>> SaveOnlyAsync<T>(this IEnumerable<T> entities, Expression<Func<T, object>> members, CancellationToken cancellation = default) where T : IEntity
         {
-            return DB.SaveOnlyAsync(entities, members, session, cancellation);
+            var enumerable = entities.ToList();
+            return DB.SaveOnlyAsync(enumerable, members, enumerable.FirstOrDefault()?.Session, cancellation);
         }
 
         /// <summary>
@@ -272,9 +274,9 @@ namespace MongoDB.Entities
         /// <param name="members">x => new { x.PropOne, x.PropTwo }</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public static Task<UpdateResult> SaveExceptAsync<T>(this T entity, Expression<Func<T, object>> members, IClientSessionHandle session = null, CancellationToken cancellation = default) where T : IEntity
+        public static Task<UpdateResult> SaveExceptAsync<T>(this T entity, Expression<Func<T, object>> members, CancellationToken cancellation = default) where T : IEntity
         {
-            return DB.SaveExceptAsync(entity, members, session, cancellation);
+            return DB.SaveExceptAsync(entity, members, entity.Session, cancellation);
         }
 
         /// <summary>
@@ -288,9 +290,10 @@ namespace MongoDB.Entities
         /// <param name="members">x => new { x.PropOne, x.PropTwo }</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public static Task<BulkWriteResult<T>> SaveExceptAsync<T>(this IEnumerable<T> entities, Expression<Func<T, object>> members, IClientSessionHandle session = null, CancellationToken cancellation = default) where T : IEntity
+        public static Task<BulkWriteResult<T>> SaveExceptAsync<T>(this IEnumerable<T> entities, Expression<Func<T, object>> members, CancellationToken cancellation = default) where T : IEntity
         {
-            return DB.SaveExceptAsync(entities, members, session, cancellation);
+            var enumerable = entities.ToList();
+            return DB.SaveExceptAsync(enumerable, members, enumerable.FirstOrDefault()?.Session, cancellation);
         }
 
         /// <summary>
@@ -300,27 +303,28 @@ namespace MongoDB.Entities
         /// <typeparam name="T">Any class that implements IEntity</typeparam>
         /// <param name="entity">The entity to save</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public static Task<UpdateResult> SavePreservingAsync<T>(this T entity, IClientSessionHandle session = null, CancellationToken cancellation = default) where T : IEntity
+        public static Task<UpdateResult> SavePreservingAsync<T>(this T entity, CancellationToken cancellation = default) where T : IEntity
         {
-            return DB.SavePreservingAsync(entity, session, cancellation);
+            return DB.SavePreservingAsync(entity, entity.Session, cancellation);
         }
 
         /// <summary>
         /// Deletes a single entity from MongoDB.
         /// <para>HINT: If this entity is referenced by one-to-many/many-to-many relationships, those references are also deleted.</para>
         /// </summary>
-        public static Task<DeleteResult> DeleteAsync<T>(this T entity, IClientSessionHandle session = null) where T : IEntity
+        public static Task<DeleteResult> DeleteAsync<T>(this T entity) where T : IEntity
         {
-            return DB.DeleteAsync<T>(entity.Id, session);
+            return DB.DeleteAsync<T>(entity.Id, entity.Session);
         }
 
         /// <summary>
         /// Deletes multiple entities from the database
         /// <para>HINT: If these entities are referenced by one-to-many/many-to-many relationships, those references are also deleted.</para>
         /// </summary>
-        public static Task<DeleteResult> DeleteAllAsync<T>(this IEnumerable<T> entities, IClientSessionHandle session = null) where T : IEntity
+        public static Task<DeleteResult> DeleteAllAsync<T>(this IEnumerable<T> entities) where T : IEntity
         {
-            return DB.DeleteAsync<T>(entities.Select(e => e.Id), session);
+            var enumerable = entities.ToList();
+            return DB.DeleteAsync<T>(enumerable.Select(e => e.Id), enumerable.FirstOrDefault()?.Session);
         }
 
         /// <summary>

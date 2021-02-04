@@ -1,4 +1,6 @@
-﻿namespace MongoDB.Entities
+﻿using MongoDB.Driver;
+
+namespace MongoDB.Entities
 {
     /// <summary>
     /// The contract for Entity classes
@@ -10,6 +12,7 @@
         /// <para>IMPORTANT: make sure to decorate this property with the [BsonId] attribute when implementing this interface</para>
         /// </summary>
         string Id { get; set; }
+        IClientSessionHandle Session { get; set; }
 
         /// <summary>
         /// Generate and return a new Id string from this method. It will be used when saving new entities that don't have their Id set. 

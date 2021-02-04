@@ -54,6 +54,8 @@ namespace MongoDB.Entities
         [BsonId, ObjectId]
         public string Id { get; set; }
 
+        IClientSessionHandle IEntity.Session { get; set; }
+
         [ObjectId]
         public string FileId { get; set; }
 

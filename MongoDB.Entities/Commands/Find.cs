@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+#pragma warning disable 618
 
 namespace MongoDB.Entities
 {
@@ -335,9 +337,17 @@ namespace MongoDB.Entities
         /// <param name="cancellation">An optional cancellation token</param>
         public async Task<List<TProjection>> ExecuteAsync(CancellationToken cancellation = default)
         {
-            return await
-                    (await ExecuteCursorAsync(cancellation).ConfigureAwait(false))
-                     .ToListAsync().ConfigureAwait(false);
+            var projections = await
+                (await ExecuteCursorAsync(cancellation).ConfigureAwait(false))
+                .ToListAsync(cancellationToken: cancellation).ConfigureAwait(false);
+            if (typeof(IEntity).IsAssignableFrom(typeof(TProjection)))
+            {
+                foreach (var projection in projections)
+                {
+                    session.Attach(projection as IEntity);
+                }
+            }
+            return projections;
         }
 
         /// <summary>
@@ -347,9 +357,14 @@ namespace MongoDB.Entities
         /// <param name="cancellation">An optional cancellation token</param>
         public async Task<TProjection> ExecuteSingleAsync(CancellationToken cancellation = default)
         {
-            return await
-                    (await ExecuteCursorAsync(cancellation).ConfigureAwait(false))
-                    .SingleOrDefaultAsync().ConfigureAwait(false);
+            var projection = await
+                (await ExecuteCursorAsync(cancellation).ConfigureAwait(false))
+                .SingleOrDefaultAsync(cancellationToken: cancellation).ConfigureAwait(false);
+            if (typeof(IEntity).IsAssignableFrom(typeof(TProjection)))
+            {
+                session.Attach(projection as IEntity);
+            }
+            return projection;
         }
 
         /// <summary>
@@ -358,15 +373,21 @@ namespace MongoDB.Entities
         /// <param name="cancellation">An optional cancellation token</param>
         public async Task<TProjection> ExecuteFirstAsync(CancellationToken cancellation = default)
         {
-            return await
-                    (await ExecuteCursorAsync(cancellation).ConfigureAwait(false))
-                    .FirstOrDefaultAsync().ConfigureAwait(false);
+            var projection = await
+                (await ExecuteCursorAsync(cancellation).ConfigureAwait(false))
+                .FirstOrDefaultAsync(cancellationToken: cancellation).ConfigureAwait(false);
+            if (typeof(IEntity).IsAssignableFrom(typeof(TProjection)))
+            {
+                session.Attach(projection as IEntity);
+            }
+            return projection;
         }
 
         /// <summary>
         /// Run the Find command in MongoDB server and get a cursor instead of materialized results
         /// </summary>
         /// <param name="cancellation">An optional cancellation token</param>
+        [Obsolete("Not recommend, projected entities will lose its session.", false)]
         public Task<IAsyncCursor<TProjection>> ExecuteCursorAsync(CancellationToken cancellation = default)
         {
             if (sorts.Count > 0)
