@@ -227,8 +227,21 @@ namespace MongoDB.Entities
         /// <param name="cancellation">An optional cancellation token</param>
         public static Task<BulkWriteResult<T>> SaveAsync<T>(this IEnumerable<T> entities, CancellationToken cancellation = default) where T : IEntity
         {
+            IClientSessionHandle session = null;
+            if (entities is Many<T> many)
+            {
+                session = many.parent?.Session;
+            }
+            else
+            {
+                session = entities.FirstOrDefault()?.Session;
+                if (entities.Any(x=>x.Session != entities.FirstOrDefault()?.Session))
+                {
+                    throw new InvalidOperationException("bulksave entities should be in the same session");
+                }
+            }
             var enumerable = entities.ToList();
-            return DB.SaveAsync(enumerable, enumerable.FirstOrDefault()?.Session, cancellation);
+            return DB.SaveAsync(enumerable, session, cancellation);
         }
 
         /// <summary>

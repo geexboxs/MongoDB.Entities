@@ -32,8 +32,8 @@ namespace MongoDB.Entities
     {
         private static readonly BulkWriteOptions unOrdBlkOpts = new BulkWriteOptions { IsOrdered = false };
 
-        private bool isInverse;
-        private IEntity parent;
+        public bool isInverse;
+        public IEntity parent;
 
         /// <inheritdoc/>
         public IEnumerator<TChild> GetEnumerator() => ChildrenQueryable().GetEnumerator();
@@ -54,6 +54,7 @@ namespace MongoDB.Entities
         /// <param name="options">An optional AggregateOptions object</param>
         public IMongoQueryable<JoinRecord> JoinQueryable(IClientSessionHandle session = null, AggregateOptions options = null)
         {
+            session ??= parent.Session;
             return session == null
                    ? JoinCollection.AsQueryable(options)
                    : JoinCollection.AsQueryable(session, options);
@@ -66,6 +67,7 @@ namespace MongoDB.Entities
         /// <param name="options">An optional AggregateOptions object</param>
         public IAggregateFluent<JoinRecord> JoinFluent(IClientSessionHandle session = null, AggregateOptions options = null)
         {
+            session ??= parent.Session;
             return session == null
                 ? JoinCollection.Aggregate(options)
                 : JoinCollection.Aggregate(session, options);
@@ -92,6 +94,7 @@ namespace MongoDB.Entities
         /// <param name="options">An optional AggregateOptions object</param>
         public IMongoQueryable<TParent> ParentsQueryable<TParent>(IEnumerable<string> childIDs, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
         {
+            session ??= parent.Session;
             if (typeof(TParent) == typeof(TChild)) throw new InvalidOperationException("Both parent and child types cannot be the same");
 
             if (isInverse)
@@ -127,6 +130,7 @@ namespace MongoDB.Entities
         /// <param name="options">An optional AggregateOptions object</param>
         public IMongoQueryable<TParent> ParentsQueryable<TParent>(IMongoQueryable<TChild> children, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
         {
+            session ??= parent.Session;
             if (typeof(TParent) == typeof(TChild)) throw new InvalidOperationException("Both parent and child types cannot be the same");
 
             if (isInverse)
@@ -227,6 +231,7 @@ namespace MongoDB.Entities
         /// <param name="options">An optional AggregateOptions object</param>
         public IAggregateFluent<TParent> ParentsFluent<TParent>(IEnumerable<string> childIDs, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
         {
+            session ??= parent.Session;
             if (typeof(TParent) == typeof(TChild)) throw new InvalidOperationException("Both parent and child types cannot be the same");
 
             if (isInverse)
@@ -263,6 +268,7 @@ namespace MongoDB.Entities
         /// <param name="cancellation">An optional cancellation token</param>
         public Task<long> ChildrenCountAsync(IClientSessionHandle session = null, CountOptions options = null, CancellationToken cancellation = default)
         {
+            session ??= parent.Session;
             parent.ThrowIfUnsaved();
 
             if (isInverse)
@@ -286,6 +292,7 @@ namespace MongoDB.Entities
         /// <param name="options">An optional AggregateOptions object</param>
         public IMongoQueryable<TChild> ChildrenQueryable(IClientSessionHandle session = null, AggregateOptions options = null)
         {
+            session ??= parent.Session;
             parent.ThrowIfUnsaved();
 
             if (isInverse)
@@ -317,6 +324,7 @@ namespace MongoDB.Entities
         /// <param name="options">An optional AggregateOptions object</param>
         public IAggregateFluent<TChild> ChildrenFluent(IClientSessionHandle session = null, AggregateOptions options = null)
         {
+            session ??= parent.Session;
             parent.ThrowIfUnsaved();
 
             if (isInverse)
@@ -456,6 +464,7 @@ namespace MongoDB.Entities
         /// <param name="cancellation">An optional cancellation token</param>
         public Task AddAsync(IEnumerable<string> childIDs, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
+            session ??= parent.Session;
             parent.ThrowIfUnsaved();
 
             var models = new List<WriteModel<JoinRecord>>();
@@ -523,6 +532,7 @@ namespace MongoDB.Entities
         /// <param name="cancellation">An optional cancellation token</param>
         public Task RemoveAsync(IEnumerable<string> childIDs, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
+            session ??= parent.Session;
             var filter =
                 isInverse
                 ? Builders<JoinRecord>.Filter.And(

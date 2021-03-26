@@ -18,6 +18,7 @@ namespace MongoDB.Entities
         /// </summary>
         [AsObjectId]
         public string Id { get; set; }
+        public IClientSessionHandle Session { get; set; }
 
         public One()
         { }
@@ -30,7 +31,9 @@ namespace MongoDB.Entities
         {
             entity.ThrowIfUnsaved();
             Id = entity.Id;
+            Session = entity.Session;
         }
+
 
         /// <summary>
         /// Operator for returning a new One&lt;T&gt; object from a string Id
@@ -58,6 +61,7 @@ namespace MongoDB.Entities
         /// <returns>A Task containing the actual entity</returns>
         public Task<T> ToEntityAsync(IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
+            session ??= Session;
             return new Find<T>(session).OneAsync(Id, cancellation);
         }
 
@@ -70,6 +74,7 @@ namespace MongoDB.Entities
         /// <returns>A Task containing the actual projected entity</returns>
         public async Task<T> ToEntityAsync(Expression<Func<T, T>> projection, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
+            session ??= Session;
             return (await new Find<T>(session)
                         .Match(Id)
                         .Project(projection)
@@ -86,6 +91,7 @@ namespace MongoDB.Entities
         /// <returns>A Task containing the actual projected entity</returns>
         public async Task<T> ToEntityAsync(Func<ProjectionDefinitionBuilder<T>, ProjectionDefinition<T, T>> projection, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
+            session ??= Session;
             return (await new Find<T>(session)
                         .Match(Id)
                         .Project(projection)
