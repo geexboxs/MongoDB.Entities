@@ -77,22 +77,22 @@ namespace MongoDB.Entities
         /// Get an IQueryable of parents matching a single child Id for this relationship.
         /// </summary>
         /// <typeparam name="TParent">The type of the parent IEntity</typeparam>
-        /// <param name="childID">A child Id</param>
+        /// <param name="childId">A child Id</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="options">An optional AggregateOptions object</param>
-        public IMongoQueryable<TParent> ParentsQueryable<TParent>(string childID, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
+        public IMongoQueryable<TParent> ParentsQueryable<TParent>(string childId, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
         {
-            return ParentsQueryable<TParent>(new[] { childID }, session, options);
+            return ParentsQueryable<TParent>(new[] { childId }, session, options);
         }
 
         /// <summary>
         /// Get an IQueryable of parents matching multiple child Ids for this relationship.
         /// </summary>
         /// <typeparam name="TParent">The type of the parent IEntity</typeparam>
-        /// <param name="childIDs">An IEnumerable of child Ids</param>
+        /// <param name="childIds">An IEnumerable of child Ids</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="options">An optional AggregateOptions object</param>
-        public IMongoQueryable<TParent> ParentsQueryable<TParent>(IEnumerable<string> childIDs, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
+        public IMongoQueryable<TParent> ParentsQueryable<TParent>(IEnumerable<string> childIds, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
         {
             session ??= parent.Session;
             if (typeof(TParent) == typeof(TChild)) throw new InvalidOperationException("Both parent and child types cannot be the same");
@@ -100,7 +100,7 @@ namespace MongoDB.Entities
             if (isInverse)
             {
                 return JoinQueryable(session, options)
-                       .Where(j => childIDs.Contains(j.ParentId))
+                       .Where(j => childIds.Contains(j.ParentId))
                        .Join(
                            DB.Collection<TParent>(),
                            j => j.ChildId,
@@ -111,7 +111,7 @@ namespace MongoDB.Entities
             else
             {
                 return JoinQueryable(session, options)
-                       .Where(j => childIDs.Contains(j.ChildId))
+                       .Where(j => childIds.Contains(j.ChildId))
                        .Join(
                            DB.Collection<TParent>(),
                            j => j.ParentId,
@@ -214,22 +214,22 @@ namespace MongoDB.Entities
         /// Get an IAggregateFluent of parents matching a single child Id for this relationship.
         /// </summary>
         /// <typeparam name="TParent">The type of the parent IEntity</typeparam>
-        /// <param name="childID">An child Id</param>
+        /// <param name="childId">An child Id</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="options">An optional AggregateOptions object</param>
-        public IAggregateFluent<TParent> ParentsFluent<TParent>(string childID, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
+        public IAggregateFluent<TParent> ParentsFluent<TParent>(string childId, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
         {
-            return ParentsFluent<TParent>(new[] { childID }, session, options);
+            return ParentsFluent<TParent>(new[] { childId }, session, options);
         }
 
         /// <summary>
         /// Get an IAggregateFluent of parents matching multiple child Ids for this relationship.
         /// </summary>
         /// <typeparam name="TParent">The type of the parent IEntity</typeparam>
-        /// <param name="childIDs">An IEnumerable of child Ids</param>
+        /// <param name="childIds">An IEnumerable of child Ids</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="options">An optional AggregateOptions object</param>
-        public IAggregateFluent<TParent> ParentsFluent<TParent>(IEnumerable<string> childIDs, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
+        public IAggregateFluent<TParent> ParentsFluent<TParent>(IEnumerable<string> childIds, IClientSessionHandle session = null, AggregateOptions options = null) where TParent : IEntity
         {
             session ??= parent.Session;
             if (typeof(TParent) == typeof(TChild)) throw new InvalidOperationException("Both parent and child types cannot be the same");
@@ -237,7 +237,7 @@ namespace MongoDB.Entities
             if (isInverse)
             {
                 return JoinFluent(session, options)
-                       .Match(f => f.In(j => j.ParentId, childIDs))
+                       .Match(f => f.In(j => j.ParentId, childIds))
                        .Lookup<JoinRecord, TParent, Joined<TParent>>(
                             DB.Collection<TParent>(),
                             j => j.ChildId,
@@ -249,7 +249,7 @@ namespace MongoDB.Entities
             else
             {
                 return JoinFluent(session, options)
-                       .Match(f => f.In(j => j.ChildId, childIDs))
+                       .Match(f => f.In(j => j.ChildId, childIds))
                        .Lookup<JoinRecord, TParent, Joined<TParent>>(
                             DB.Collection<TParent>(),
                             r => r.ParentId,
@@ -447,41 +447,41 @@ namespace MongoDB.Entities
         /// Adds a new child reference.
         /// <para>WARNING: Make sure to save the parent and child Entities before calling this method.</para>
         /// </summary>
-        /// <param name="childID">The Id of the child Entity to add.</param>
+        /// <param name="childId">The Id of the child Entity to add.</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public Task AddAsync(string childID, IClientSessionHandle session = null, CancellationToken cancellation = default)
+        public Task AddAsync(string childId, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
-            return AddAsync(new[] { childID }, session, cancellation);
+            return AddAsync(new[] { childId }, session, cancellation);
         }
 
         /// <summary>
         /// Adds multiple child references in a single bulk operation
         /// <para>WARNING: Make sure to save the parent and child Entities before calling this method.</para>
         /// </summary>
-        /// <param name="childIDs">The Ids of the child Entities to add.</param>
+        /// <param name="childIds">The Ids of the child Entities to add.</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public Task AddAsync(IEnumerable<string> childIDs, IClientSessionHandle session = null, CancellationToken cancellation = default)
+        public Task AddAsync(IEnumerable<string> childIds, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
             session ??= parent.Session;
             parent.ThrowIfUnsaved();
 
             var models = new List<WriteModel<JoinRecord>>();
-            foreach (var cid in childIDs)
+            foreach (var cid in childIds)
             {
                 cid.ThrowIfUnsaved();
 
-                var parentID = isInverse ? cid : parent.Id;
-                var childID = isInverse ? parent.Id : cid;
+                var parentId = isInverse ? cid : parent.Id;
+                var childId = isInverse ? parent.Id : cid;
 
                 var filter = Builders<JoinRecord>.Filter.Where(
-                    j => j.ParentId == parentID &&
-                    j.ChildId == childID);
+                    j => j.ParentId == parentId &&
+                    j.ChildId == childId);
 
                 var update = Builders<JoinRecord>.Update
-                    .Set(j => j.ParentId, parentID)
-                    .Set(j => j.ChildId, childID);
+                    .Set(j => j.ParentId, parentId)
+                    .Set(j => j.ChildId, childId);
 
                 models.Add(new UpdateOneModel<JoinRecord>(filter, update) { IsUpsert = true });
             }
@@ -505,12 +505,12 @@ namespace MongoDB.Entities
         /// <summary>
         /// Removes a child reference.
         /// </summary>
-        /// <param name="childID">The Id of the child Entity to remove the reference of.</param>
+        /// <param name="childId">The Id of the child Entity to remove the reference of.</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public Task RemoveAsync(string childID, IClientSessionHandle session = null, CancellationToken cancellation = default)
+        public Task RemoveAsync(string childId, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
-            return RemoveAsync(new[] { childID }, session, cancellation);
+            return RemoveAsync(new[] { childId }, session, cancellation);
         }
 
         /// <summary>
@@ -527,21 +527,21 @@ namespace MongoDB.Entities
         /// <summary>
         /// Removes child references.
         /// </summary>
-        /// <param name="childIDs">The Ids of the child Entities to remove the references of</param>
+        /// <param name="childIds">The Ids of the child Entities to remove the references of</param>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public Task RemoveAsync(IEnumerable<string> childIDs, IClientSessionHandle session = null, CancellationToken cancellation = default)
+        public Task RemoveAsync(IEnumerable<string> childIds, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
             session ??= parent.Session;
             var filter =
                 isInverse
                 ? Builders<JoinRecord>.Filter.And(
                     Builders<JoinRecord>.Filter.Eq(j => j.ChildId, parent.Id),
-                    Builders<JoinRecord>.Filter.In(j => j.ParentId, childIDs))
+                    Builders<JoinRecord>.Filter.In(j => j.ParentId, childIds))
 
                 : Builders<JoinRecord>.Filter.And(
                     Builders<JoinRecord>.Filter.Eq(j => j.ParentId, parent.Id),
-                    Builders<JoinRecord>.Filter.In(j => j.ChildId, childIDs));
+                    Builders<JoinRecord>.Filter.In(j => j.ChildId, childIds));
 
             return session == null
                    ? JoinCollection.DeleteOneAsync(filter, null, cancellation)

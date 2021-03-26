@@ -235,7 +235,7 @@ namespace MongoDB.Entities
             else
             {
                 session = entities.FirstOrDefault()?.Session;
-                if (entities.Any(x=>x.Session != entities.FirstOrDefault()?.Session))
+                if (entities.Any(x => x.Session != entities.FirstOrDefault()?.Session))
                 {
                     throw new InvalidOperationException("bulksave entities should be in the same session");
                 }
