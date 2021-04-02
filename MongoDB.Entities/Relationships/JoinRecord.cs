@@ -2,7 +2,7 @@
 {
     /// <summary>
     /// Represents a parent-child relationship between two entities.
-    /// <para>TIP: The ParentID and ChildID switches around for many-to-many relationships depending on the side of the relationship you're accessing.</para>
+    /// <para>TIP: The ParentId and ChildId switches around for many-to-many relationships depending on the side of the relationship you're accessing.</para>
     /// </summary>
     public class JoinRecord : Entity
     {
@@ -10,12 +10,12 @@
         /// The Id of the parent IEntity for both one-to-many and the owner side of many-to-many relationships.
         /// </summary>
         [AsObjectId]
-        public string ParentID { get; set; }
+        public string ParentId { get; set; }
 
         /// <summary>
         /// The Id of the child IEntity in one-to-many relationships and the Id of the inverse side IEntity in many-to-many relationships.
         /// </summary>
         [AsObjectId]
-        public string ChildID { get; set; }
+        public string ChildId { get; set; }
     }
 }

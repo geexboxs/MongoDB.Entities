@@ -36,8 +36,8 @@ namespace MongoDB.Entities
             {
                 tasks.Add(
                     session == null
-                    ? db.GetCollection<JoinRecord>(cName).DeleteManyAsync(r => Ids.Contains(r.ChildID) || Ids.Contains(r.ParentID))
-                    : db.GetCollection<JoinRecord>(cName).DeleteManyAsync(session, r => Ids.Contains(r.ChildID) || Ids.Contains(r.ParentID), null, cancellation));
+                    ? db.GetCollection<JoinRecord>(cName).DeleteManyAsync(r => Ids.Contains(r.ChildId) || Ids.Contains(r.ParentId))
+                    : db.GetCollection<JoinRecord>(cName).DeleteManyAsync(session, r => Ids.Contains(r.ChildId) || Ids.Contains(r.ParentId), null, cancellation));
             }
 
             var delResTask =

@@ -2,6 +2,7 @@
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -375,7 +376,7 @@ namespace MongoDB.Entities
         /// </summary>
         /// <param name="parent"></param>
         /// <param name="propertyToInit">() => PropertyName</param>
-        public static void InitOneToMany<TChild>(this IEntity parent, Expression<Func<Many<TChild>>> propertyToInit) where TChild : IEntity
+        public static void InitOneToMany<TEntity, TChild>(this TEntity parent, Expression<Func<TEntity, Many<TChild>>> propertyToInit) where TChild : IEntity where TEntity : IEntity
         {
             var property = (PropertyInfo)((MemberExpression)propertyToInit.Body).Member;
             property.SetValue(parent, new Many<TChild>(parent, property.Name));
@@ -387,7 +388,7 @@ namespace MongoDB.Entities
         /// <param name="parent"></param>
         /// <param name="propertyToInit">() = > PropertyName</param>
         /// <param name="propertyOtherSide">x => x.PropertyName</param>
-        public static void InitManyToMany<TChild>(this IEntity parent, Expression<Func<Many<TChild>>> propertyToInit, Expression<Func<TChild, object>> propertyOtherSide) where TChild : IEntity
+        public static void InitManyToMany<TEntity, TChild>(this TEntity parent, Expression<Func<TEntity, Many<TChild>>> propertyToInit, Expression<Func<TChild, object>> propertyOtherSide) where TChild : IEntity where TEntity : IEntity
         {
             var property = (PropertyInfo)((MemberExpression)propertyToInit.Body).Member;
             var hasOwnerAttrib = property.IsDefined(typeof(OwnerSideAttribute), false);

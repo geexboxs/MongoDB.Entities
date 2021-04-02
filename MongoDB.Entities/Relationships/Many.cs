@@ -97,10 +97,10 @@ namespace MongoDB.Entities
             if (isInverse)
             {
                 return JoinQueryable(session, options)
-                       .Where(j => childIDs.Contains(j.ParentID))
+                       .Where(j => childIDs.Contains(j.ParentId))
                        .Join(
                            DB.Collection<TParent>(),
-                           j => j.ChildID,
+                           j => j.ChildId,
                            p => p.Id,
                            (_, p) => p)
                        .Distinct();
@@ -108,10 +108,10 @@ namespace MongoDB.Entities
             else
             {
                 return JoinQueryable(session, options)
-                       .Where(j => childIDs.Contains(j.ChildID))
+                       .Where(j => childIDs.Contains(j.ChildId))
                        .Join(
                            DB.Collection<TParent>(),
-                           j => j.ParentID,
+                           j => j.ParentId,
                            p => p.Id,
                            (_, p) => p)
                        .Distinct();
@@ -135,11 +135,11 @@ namespace MongoDB.Entities
                         .Join(
                              JoinQueryable(session, options),
                              c => c.Id,
-                             j => j.ParentID,
+                             j => j.ParentId,
                              (_, j) => j)
                         .Join(
                            DB.Collection<TParent>(),
-                           j => j.ChildID,
+                           j => j.ChildId,
                            p => p.Id,
                            (_, p) => p)
                         .Distinct();
@@ -150,11 +150,11 @@ namespace MongoDB.Entities
                        .Join(
                             JoinQueryable(session, options),
                             c => c.Id,
-                            j => j.ChildID,
+                            j => j.ChildId,
                             (_, j) => j)
                        .Join(
                             DB.Collection<TParent>(),
-                            j => j.ParentID,
+                            j => j.ParentId,
                             p => p.Id,
                             (_, p) => p)
                        .Distinct();
@@ -176,12 +176,12 @@ namespace MongoDB.Entities
                        .Lookup<TChild, JoinRecord, Joined<JoinRecord>>(
                             JoinCollection,
                             c => c.Id,
-                            r => r.ParentID,
+                            r => r.ParentId,
                             j => j.Results)
                        .ReplaceRoot(j => j.Results[0])
                        .Lookup<JoinRecord, TParent, Joined<TParent>>(
                             DB.Collection<TParent>(),
-                            r => r.ChildID,
+                            r => r.ChildId,
                             p => p.Id,
                             j => j.Results)
                        .ReplaceRoot(j => j.Results[0])
@@ -193,12 +193,12 @@ namespace MongoDB.Entities
                        .Lookup<TChild, JoinRecord, Joined<JoinRecord>>(
                             JoinCollection,
                             c => c.Id,
-                            r => r.ChildID,
+                            r => r.ChildId,
                             j => j.Results)
                        .ReplaceRoot(j => j.Results[0])
                        .Lookup<JoinRecord, TParent, Joined<TParent>>(
                             DB.Collection<TParent>(),
-                            r => r.ParentID,
+                            r => r.ParentId,
                             p => p.Id,
                             j => j.Results)
                        .ReplaceRoot(j => j.Results[0])
@@ -232,10 +232,10 @@ namespace MongoDB.Entities
             if (isInverse)
             {
                 return JoinFluent(session, options)
-                       .Match(f => f.In(j => j.ParentID, childIDs))
+                       .Match(f => f.In(j => j.ParentId, childIDs))
                        .Lookup<JoinRecord, TParent, Joined<TParent>>(
                             DB.Collection<TParent>(),
-                            j => j.ChildID,
+                            j => j.ChildId,
                             p => p.Id,
                             j => j.Results)
                        .ReplaceRoot(j => j.Results[0])
@@ -244,10 +244,10 @@ namespace MongoDB.Entities
             else
             {
                 return JoinFluent(session, options)
-                       .Match(f => f.In(j => j.ChildID, childIDs))
+                       .Match(f => f.In(j => j.ChildId, childIDs))
                        .Lookup<JoinRecord, TParent, Joined<TParent>>(
                             DB.Collection<TParent>(),
-                            r => r.ParentID,
+                            r => r.ParentId,
                             p => p.Id,
                             j => j.Results)
                        .ReplaceRoot(j => j.Results[0])
@@ -268,14 +268,14 @@ namespace MongoDB.Entities
             if (isInverse)
             {
                 return session == null
-                       ? JoinCollection.CountDocumentsAsync(j => j.ChildID == parent.Id, options, cancellation)
-                       : JoinCollection.CountDocumentsAsync(session, j => j.ChildID == parent.Id, options, cancellation);
+                       ? JoinCollection.CountDocumentsAsync(j => j.ChildId == parent.Id, options, cancellation)
+                       : JoinCollection.CountDocumentsAsync(session, j => j.ChildId == parent.Id, options, cancellation);
             }
             else
             {
                 return session == null
-                       ? JoinCollection.CountDocumentsAsync(j => j.ParentID == parent.Id, options, cancellation)
-                       : JoinCollection.CountDocumentsAsync(session, j => j.ParentID == parent.Id, options, cancellation);
+                       ? JoinCollection.CountDocumentsAsync(j => j.ParentId == parent.Id, options, cancellation)
+                       : JoinCollection.CountDocumentsAsync(session, j => j.ParentId == parent.Id, options, cancellation);
             }
         }
 
@@ -291,20 +291,20 @@ namespace MongoDB.Entities
             if (isInverse)
             {
                 return JoinQueryable(session, options)
-                       .Where(j => j.ChildID == parent.Id)
+                       .Where(j => j.ChildId == parent.Id)
                        .Join(
                            DB.Collection<TChild>(),
-                           j => j.ParentID,
+                           j => j.ParentId,
                            c => c.Id,
                            (_, c) => c);
             }
             else
             {
                 return JoinQueryable(session, options)
-                       .Where(j => j.ParentID == parent.Id)
+                       .Where(j => j.ParentId == parent.Id)
                        .Join(
                            DB.Collection<TChild>(),
-                           j => j.ChildID,
+                           j => j.ChildId,
                            c => c.Id,
                            (_, c) => c);
             }
@@ -322,10 +322,10 @@ namespace MongoDB.Entities
             if (isInverse)
             {
                 return JoinFluent(session, options)
-                        .Match(f => f.Eq(r => r.ChildID, parent.Id))
+                        .Match(f => f.Eq(r => r.ChildId, parent.Id))
                         .Lookup<JoinRecord, TChild, Joined<TChild>>(
                             DB.Collection<TChild>(),
-                            r => r.ParentID,
+                            r => r.ParentId,
                             c => c.Id,
                             j => j.Results)
                         .ReplaceRoot(j => j.Results[0]);
@@ -333,10 +333,10 @@ namespace MongoDB.Entities
             else
             {
                 return JoinFluent(session, options)
-                        .Match(f => f.Eq(r => r.ParentID, parent.Id))
+                        .Match(f => f.Eq(r => r.ParentId, parent.Id))
                         .Lookup<JoinRecord, TChild, Joined<TChild>>(
                             DB.Collection<TChild>(),
-                            r => r.ChildID,
+                            r => r.ChildId,
                             c => c.Id,
                             j => j.Results)
                         .ReplaceRoot(j => j.Results[0]);
@@ -392,19 +392,19 @@ namespace MongoDB.Entities
                 collection.Indexes.CreateManyAsync(
                     new[] {
                         new CreateIndexModel<JoinRecord>(
-                            Builders<JoinRecord>.IndexKeys.Ascending(r => r.ParentID),
+                            Builders<JoinRecord>.IndexKeys.Ascending(r => r.ParentId),
                             new CreateIndexOptions
                             {
                                 Background = true,
-                                Name = "[ParentID]"
+                                Name = "[ParentId]"
                             })
                         ,
                         new CreateIndexModel<JoinRecord>(
-                            Builders<JoinRecord>.IndexKeys.Ascending(r => r.ChildID),
+                            Builders<JoinRecord>.IndexKeys.Ascending(r => r.ChildId),
                             new CreateIndexOptions
                             {
                                 Background = true,
-                                Name = "[ChildID]"
+                                Name = "[ChildId]"
                             })
                     });
             }
@@ -467,12 +467,12 @@ namespace MongoDB.Entities
                 var childID = isInverse ? parent.Id : cid;
 
                 var filter = Builders<JoinRecord>.Filter.Where(
-                    j => j.ParentID == parentID &&
-                    j.ChildID == childID);
+                    j => j.ParentId == parentID &&
+                    j.ChildId == childID);
 
                 var update = Builders<JoinRecord>.Update
-                    .Set(j => j.ParentID, parentID)
-                    .Set(j => j.ChildID, childID);
+                    .Set(j => j.ParentId, parentID)
+                    .Set(j => j.ChildId, childID);
 
                 models.Add(new UpdateOneModel<JoinRecord>(filter, update) { IsUpsert = true });
             }
@@ -526,12 +526,12 @@ namespace MongoDB.Entities
             var filter =
                 isInverse
                 ? Builders<JoinRecord>.Filter.And(
-                    Builders<JoinRecord>.Filter.Eq(j => j.ChildID, parent.Id),
-                    Builders<JoinRecord>.Filter.In(j => j.ParentID, childIDs))
+                    Builders<JoinRecord>.Filter.Eq(j => j.ChildId, parent.Id),
+                    Builders<JoinRecord>.Filter.In(j => j.ParentId, childIDs))
 
                 : Builders<JoinRecord>.Filter.And(
-                    Builders<JoinRecord>.Filter.Eq(j => j.ParentID, parent.Id),
-                    Builders<JoinRecord>.Filter.In(j => j.ChildID, childIDs));
+                    Builders<JoinRecord>.Filter.Eq(j => j.ParentId, parent.Id),
+                    Builders<JoinRecord>.Filter.In(j => j.ChildId, childIDs));
 
             return session == null
                    ? JoinCollection.DeleteOneAsync(filter, null, cancellation)
