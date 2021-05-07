@@ -13,6 +13,10 @@ echo "Started.."
 
 echo ~~~~~~~~setup replic time now: `date +"%T" `
 echo ${mongodb1},  ${mongodb2},  ${mongodb3}
+# 以下代码在master上执行以删除rs(需要重启)
+use local;
+var rsId = db.system.replset.find().id;
+db.system.replset.remove({"_id":rsId});
 mongo <<EOF
     var cfg = {
         "_id": "rs",
@@ -21,25 +25,25 @@ mongo <<EOF
             {
                 "_id": 0,
                 "host": "${mongodb1}:${port}",
-                "priority": 0
+                "priority": 1
             },
             {
                 "_id": 1,
                 "host": "${mongodb2}:${port}",
-                "priority": 2
+                "priority": 0
             },
             {
                 "_id": 2,
                 "host": "${mongodb3}:${port}",
-                "priority": 2
+                "priority": 0
             }
         ]
     };
     rs.initiate(cfg, { force: true });
     rs.reconfig(cfg, { force: true });
-    rs.slaveOk();
+    rs.secondaryOk();
     db.getMongo().setReadPref('nearest');
-    db.getMongo().setSlaveOk();
+    db.getMongo().setSecondaryOk();
 EOF
 sleep 30
 USER = "root"
