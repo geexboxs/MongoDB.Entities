@@ -4,6 +4,7 @@ services:
   mongo-admin:
     image: mongo-express
     container_name: "mongo-admin"
+    restart: always
     environment:
       # - USER=root
       # - PASSWORD=123456
@@ -25,10 +26,17 @@ services:
     container_name: mongodb1
     volumes:
       - mongodb1:/data/db
-    command: mongod --replSet rs --bind_ip 0.0.0.0
+    command: mongod --replSet rs --bind_ip_all
     ports:
       - "27017:27017"
     restart: always
+    healthcheck:
+      test: test $$(echo "rs.initiate({_id:'rs',members:[{_id:0,host:\"mongo1:27017\"},{_id:1,host:\"mongo2:27017\"},{_id:2,host:\"mongo3:27017\"}]}).ok || rs.status().ok" | mongo --port 27017 --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
+    depends_on:
+      - mongodb2
+      - mongodb3
     # environment:
     #   - MONGO_INITDB_ROOT_USERNAME=root
     #   - MONGO_INITDB_ROOT_PASSWORD=123456
@@ -39,7 +47,7 @@ services:
     container_name: mongodb2
     volumes:
       - mongodb2:/data/db
-    command: mongod --replSet rs --bind_ip 0.0.0.0
+    command: mongod --replSet rs --bind_ip_all
     ports:
       - "27018:27017"
     restart: always
@@ -53,7 +61,7 @@ services:
     container_name: mongodb3
     volumes:
       - mongodb3:/data/db
-    command: mongod --replSet rs --bind_ip 0.0.0.0
+    command: mongod --replSet rs --bind_ip_all
     ports:
       - "27019:27017"
     restart: always
