@@ -17,7 +17,7 @@
 - optimize Transaction class
 - upgrade mongo driver to latest
 - increase test coverage</PackageReleaseNotes>
-    <PackageId>MongoDB.Entities</PackageId>
+    <PackageId>Geex.MongoDB.Entities</PackageId>
     <Product>MongoDB.Entities</Product>
     <RepositoryUrl>https://github.com/dj-nitehawk/MongoDB.Entities</RepositoryUrl>
     <PackageIcon>icon.png</PackageIcon>
