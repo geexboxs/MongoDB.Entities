@@ -53,9 +53,9 @@ namespace MongoDB.Entities
             }
             else
             {
-                assemblies = new[] { targetType.Assembly };
+                assemblies = new[] { targetType.Assembly }.Concat(targetType.Assembly.GetReferencedAssemblies().Select(Assembly.Load));
             }
-
+            using var dbContext = new DbContext(transactional:true);
             var types = assemblies
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.GetInterfaces().Contains(typeof(IMigration)));
@@ -64,7 +64,7 @@ namespace MongoDB.Entities
                 throw new InvalidOperationException("Didn't find any classes that implement IMigrate interface.");
 
             var lastMigNum = (
-                await Find<Migration, int>()
+                await dbContext.Find<Migration, long>()
                       .Sort(m => m.Number, Order.Descending)
                       .Limit(1)
                       .Project(m => m.Number)
@@ -72,11 +72,11 @@ namespace MongoDB.Entities
                       .ConfigureAwait(false))
                 .SingleOrDefault();
 
-            var migrations = new SortedDictionary<int, IMigration>();
+            var migrations = new SortedDictionary<long, IMigration>();
 
             foreach (var t in types)
             {
-                var success = int.TryParse(t.Name.Split('_')[1], out int migNum);
+                var success = long.TryParse(t.Name.Split('_')[1], out long migNum);
 
                 if (!success)
                     throw new InvalidOperationException("Failed to parse migration number from the class name. Make sure to name the migration classes like: _001_some_migration_name.cs");
@@ -90,14 +90,16 @@ namespace MongoDB.Entities
             foreach (var migration in migrations)
             {
                 sw.Start();
-                await migration.Value.UpgradeAsync().ConfigureAwait(false);
+                await migration.Value.UpgradeAsync(dbContext).ConfigureAwait(false);
                 var mig = new Migration
                 {
                     Number = migration.Key,
                     Name = migration.Value.GetType().Name,
                     TimeTakenSeconds = sw.Elapsed.TotalSeconds
                 };
-                await SaveAsync(mig).ConfigureAwait(false);
+                dbContext.AttachContextSession(mig);
+                await mig.SaveAsync().ConfigureAwait(false);
+                await dbContext.CommitAsync().ConfigureAwait(false);
                 sw.Stop();
                 sw.Reset();
             }

@@ -1,4 +1,6 @@
-﻿namespace MongoDB.Entities
+﻿using System;
+
+namespace MongoDB.Entities
 {
     /// <summary>
     /// Represents a migration history item in the database
@@ -6,7 +8,7 @@
     [Name("_migration_history_")]
     public class Migration : Entity
     {
-        public int Number { get; set; }
+        public long Number { get; set; }
         public string Name { get; set; }
         public double TimeTakenSeconds { get; set; }
     }

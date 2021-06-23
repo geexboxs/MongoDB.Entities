@@ -7,6 +7,6 @@ namespace MongoDB.Entities
     /// </summary>
     public interface IMigration
     {
-        Task UpgradeAsync();
+        Task UpgradeAsync(DbContext dbContext);
     }
 }
