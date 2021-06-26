@@ -102,7 +102,11 @@ namespace MongoDB.Entities
                 sw.Stop();
                 sw.Reset();
             }
-            await dbContext.CommitAsync().ConfigureAwait(false);
+
+            if (migrations.Any())
+            {
+                await dbContext.CommitAsync().ConfigureAwait(false);
+            }
         }
     }
 }
