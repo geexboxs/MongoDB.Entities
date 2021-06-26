@@ -55,13 +55,13 @@ namespace MongoDB.Entities
             {
                 assemblies = new[] { targetType.Assembly }.Concat(targetType.Assembly.GetReferencedAssemblies().Select(Assembly.Load));
             }
-            using var dbContext = new DbContext(transactional:true);
+            using var dbContext = new DbContext(transactional: true);
             var types = assemblies
                 .SelectMany(a => a.GetTypes())
                 .Where(t => t.GetInterfaces().Contains(typeof(IMigration)));
 
-            if (!types.Any())
-                throw new InvalidOperationException("Didn't find any classes that implement IMigrate interface.");
+            //if (!types.Any())
+            //    throw new InvalidOperationException("Didn't find any classes that implement IMigration interface.");
 
             var lastMigNum = (
                 await dbContext.Find<Migration, long>()
@@ -79,7 +79,7 @@ namespace MongoDB.Entities
                 var success = long.TryParse(t.Name.Split('_')[1], out long migNum);
 
                 if (!success)
-                    throw new InvalidOperationException("Failed to parse migration number from the class name. Make sure to name the migration classes like: _001_some_migration_name.cs");
+                    throw new InvalidOperationException("Failed to parse migration number from the class name. Make sure to name the migration classes like: _20210623103815_some_migration_name.cs");
 
                 if (migNum > lastMigNum)
                     migrations.Add(migNum, (IMigration)Activator.CreateInstance(t));
@@ -99,10 +99,10 @@ namespace MongoDB.Entities
                 };
                 dbContext.AttachContextSession(mig);
                 await mig.SaveAsync().ConfigureAwait(false);
-                await dbContext.CommitAsync().ConfigureAwait(false);
                 sw.Stop();
                 sw.Reset();
             }
+            await dbContext.CommitAsync().ConfigureAwait(false);
         }
     }
 }
