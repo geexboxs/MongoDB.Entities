@@ -15,7 +15,7 @@ namespace Benchmark
         public Date Birthday { get; set; }
         public Many<Book> Books { get; set; }
 
-        public Author() => this.InitOneToMany(() => Books);
+        public Author() => this.InitOneToMany(x => Books);
     }
 
     public class Book : Entity

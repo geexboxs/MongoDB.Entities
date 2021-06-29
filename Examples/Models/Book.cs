@@ -19,8 +19,8 @@ namespace Examples.Models
 
         public Book()
         {
-            this.InitOneToMany(() => Authors);
-            this.InitManyToMany(() => AllGenres, genre => genre.AllBooks);
+            this.InitOneToMany(x => Authors);
+            this.InitManyToMany(x => AllGenres, genre => genre.AllBooks);
         }
     }
 }

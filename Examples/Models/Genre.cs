@@ -9,6 +9,6 @@ namespace Examples.Models
         [InverseSide]
         public Many<Book> AllBooks { get; set; }
 
-        public Genre() => this.InitManyToMany(() => AllBooks, book => book.AllGenres);
+        public Genre() => this.InitManyToMany(x => AllBooks, book => book.AllGenres);
     }
 }

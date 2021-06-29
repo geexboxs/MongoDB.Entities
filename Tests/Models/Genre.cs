@@ -13,6 +13,6 @@ namespace MongoDB.Entities.Tests
         [InverseSide]
         public Many<Book> Books { get; set; }
 
-        public Genre() => this.InitManyToMany(() => Books, b => b.Genres);
+        public Genre() => this.InitManyToMany(x => Books, b => b.Genres);
     }
 }

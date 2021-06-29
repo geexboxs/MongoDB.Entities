@@ -8,7 +8,7 @@
 
         public BookCover()
         {
-            this.InitOneToMany(() => BookMarks);
+            this.InitOneToMany(x => BookMarks);
         }
     }
 }

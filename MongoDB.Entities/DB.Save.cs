@@ -1,11 +1,14 @@
 ﻿using MongoDB.Driver;
+
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using MongoDB.Entities.Interceptors;
 
 namespace MongoDB.Entities
 {
@@ -13,7 +16,37 @@ namespace MongoDB.Entities
     {
         private static readonly BulkWriteOptions unOrdBlkOpts = new BulkWriteOptions { IsOrdered = false };
         private static readonly UpdateOptions updateOptions = new UpdateOptions { IsUpsert = true };
+        public static ConcurrentDictionary<Type, ISaveInterceptor> SaveInterceptors { get; private set; } = new()
+        {
+        };
+        public static ConcurrentDictionary<Type, IDataFilter> DataFilters { get; private set; } = new()
+        {
+        };
+        public static void RegisterSaveInterceptors(params ISaveInterceptor[] interceptors)
+        {
+            foreach (var interceptor in interceptors)
+            {
+                if (!interceptor.GetType().BaseType.Name.EndsWith("Interceptor`1"))
+                {
+                    throw new NotSupportedException("interceptors must directly inherit abstract Interceptor<>");
+                }
 
+                DB.SaveInterceptors.AddOrUpdate(interceptor.GetType().BaseType.GenericTypeArguments[0], interceptor, (_, _) => interceptor);
+            }
+        }
+
+        public static void RegisterDataFilters(params IDataFilter[] dataFilters)
+        {
+            foreach (var dataFilter in dataFilters)
+            {
+                if (!dataFilter.GetType().BaseType.Name.EndsWith("DataFilter`1"))
+                {
+                    throw new NotSupportedException("interceptors must directly inherit abstract Interceptor<>");
+                }
+
+                DB.DataFilters.AddOrUpdate(dataFilter.GetType().BaseType.GenericTypeArguments[0], dataFilter, (_, _) => dataFilter);
+            }
+        }
         /// <summary>
         /// Saves a complete entity replacing an existing entity or creating a new one if it does not exist. 
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is replaced.
@@ -174,15 +207,26 @@ namespace MongoDB.Entities
 
         private static void PrepareForSave<T>(T entity) where T : IEntity
         {
+            if (entity is ISaveIntercepted)
+            {
+                foreach (var (entityType, interceptor) in DB.SaveInterceptors)
+                {
+                    if (entityType.IsInstanceOfType(entity))
+                    {
+                        interceptor.Apply(entity);
+                    }
+                }
+            }
+
             if (string.IsNullOrEmpty(entity.Id))
             {
                 entity.Id = entity.GenerateNewId();
-                if (Cache<T>.HasCreatedOn)
-                    ((ICreatedOn)entity).CreatedOn = DateTime.UtcNow;
+                if (entity is ICreatedOn createdOn)
+                    createdOn.CreatedOn = DateTime.UtcNow;
             }
 
-            if (Cache<T>.HasModifiedOn)
-                ((IModifiedOn)entity).ModifiedOn = DateTime.UtcNow;
+            if (entity is IModifiedOn modifiedOn)
+                modifiedOn.ModifiedOn = DateTime.UtcNow;
         }
 
         private static IEnumerable<string> RootPropNames<T>(Expression<Func<T, object>> members) where T : IEntity

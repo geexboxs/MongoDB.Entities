@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+
 #pragma warning disable 618
 
 namespace MongoDB.Entities
@@ -41,6 +42,7 @@ namespace MongoDB.Entities
         {
             this.session = session;
         }
+
 
         /// <summary>
         /// Find a single IEntity by id
@@ -392,6 +394,14 @@ namespace MongoDB.Entities
         {
             if (sorts.Count > 0)
                 options.Sort = Builders<T>.Sort.Combine(sorts);
+
+            foreach (var (type, interceptor) in DB.DataFilters)
+            {
+                if (type.IsAssignableFrom(typeof(T)))
+                {
+                    filter = interceptor.Apply(filter);
+                }
+            }
 
             return session == null
                    ? DB.Collection<T>().FindAsync(filter, options, cancellation)

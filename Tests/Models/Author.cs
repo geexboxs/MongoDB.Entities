@@ -33,6 +33,6 @@ namespace MongoDB.Entities.Tests
 
         public DateTime CreatedOn { get; set; }
 
-        public Author() => this.InitOneToMany(() => Books);
+        public Author() => this.InitOneToMany(x => Books);
     }
 }

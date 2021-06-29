@@ -4,9 +4,9 @@ namespace MongoDB.Entities.Tests
 {
     public class _002_undo_field_rename : IMigration
     {
-        public async Task UpgradeAsync()
+        public async Task UpgradeAsync(DbContext dbContext)
         {
-            await DB.Update<Book>()
+             await dbContext.Update<Book>()
               .Match(_ => true)
               .Modify(b => b.Rename("Price", "SellingPrice"))
               .ExecuteAsync().ConfigureAwait(false);

@@ -4,6 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -241,9 +242,9 @@ namespace MongoDB.Entities
         internal static string DBName { get; private set; }
         internal static string CollectionName { get; private set; }
         internal static ConcurrentDictionary<string, Watcher<T>> Watchers { get; private set; }
-        internal static bool HasCreatedOn { get; private set; }
         internal static bool HasModifiedOn { get; private set; }
         internal static string ModifiedOnPropName { get; private set; }
+
 
         private static PropertyInfo[] updatableProps;
 
@@ -272,7 +273,6 @@ namespace MongoDB.Entities
             Watchers = new ConcurrentDictionary<string, Watcher<T>>();
 
             var interfaces = type.GetInterfaces();
-            HasCreatedOn = interfaces.Any(it => it == typeof(ICreatedOn));
             HasModifiedOn = interfaces.Any(it => it == typeof(IModifiedOn));
             ModifiedOnPropName = nameof(IModifiedOn.ModifiedOn);
 

@@ -1,11 +1,14 @@
 ﻿using MongoDB.Driver;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Bson;
 using MongoDB.Driver.Linq;
+using MongoDB.Entities.Interceptors;
 
 namespace MongoDB.Entities
 {
@@ -23,6 +26,11 @@ namespace MongoDB.Entities
         {
             get => session;
         }
+        /// <summary>
+        /// static interceptors shortcut property.
+        /// </summary>
+        public IReadOnlyList<IDataFilter> DataFilters => DB.DataFilters.Values.ToList();
+        public IReadOnlyList<ISaveInterceptor> SaveInterceptors => DB.SaveInterceptors.Values.ToList();
 
         /// <summary>
         /// Instantiates and begins a transaction.
@@ -47,6 +55,23 @@ namespace MongoDB.Entities
         {
             return DB.CountAsync(expression, session, cancellation);
         }
+
+        /// <summary>
+        /// Register interceptors
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="interceptors"></param>
+        /// <returns></returns>
+        public virtual void RegisterSaveInterceptors(params ISaveInterceptor[] interceptors)
+        {
+            DB.RegisterSaveInterceptors(interceptors);
+        }
+
+        public virtual void RegisterDataFilters(params IDataFilter[] dataFilters)
+        {
+            DB.RegisterDataFilters(dataFilters);
+        }
+
 
         public virtual void AttachContextSession(IEntity entity)
         {
@@ -419,5 +444,7 @@ namespace MongoDB.Entities
                 entity.Session = this.Session;
             }
         }
+
+        
     }
 }

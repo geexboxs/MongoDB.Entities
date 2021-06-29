@@ -8,7 +8,7 @@
 
         public Flower()
         {
-            this.InitOneToMany(() => Customers);
+            this.InitOneToMany(x => Customers);
         }
     }
 }

@@ -8,6 +8,6 @@ namespace Examples.Models
         public One<Book> BestSeller { get; set; }
         public Many<Book> Books { get; set; }
 
-        public Author() => this.InitOneToMany(() => Books);
+        public Author() => this.InitOneToMany(x => Books);
     }
 }
