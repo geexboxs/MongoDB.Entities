@@ -197,7 +197,7 @@ namespace MongoDB.Entities.Tests
                 await db.AbortAsync();
             }
             res = await DB.Find<Book>().ManyAsync(b => b.Title.Contains(guid1));
-            Assert.AreEqual(0,res.Count);
+            Assert.AreEqual(0, res.Count);
             using (var db = new DbContext())
             {
                 res = await db.Find<Book>().ManyAsync(b => b.Title.Contains(guid));
@@ -219,6 +219,33 @@ namespace MongoDB.Entities.Tests
             //Assert.AreEqual(3, res.Count);
             //Assert.AreEqual("updated " + guid1, res[0].Title);
 
+        }
+
+        [TestMethod]
+        public async Task commit_event_should_work()
+        {
+            var guid = Guid.NewGuid().ToString();
+            var triggered = false;
+
+            var entities = new[] {
+                new Book{Title="one "+guid},
+                new Book{Title="two "+guid},
+                new Book{Title="thr "+guid}
+            };
+
+            using (var TN = new DbContext())
+            {
+                TN.AttachContextSession(entities);
+                await entities.SaveAsync();
+                TN.OnCommitted += async (sender) =>
+                 {
+                     await Task.Delay(1000);
+                     triggered = true;
+                 };
+                await TN.CommitAsync();
+            }
+
+            Assert.IsTrue(triggered);
         }
     }
 }
