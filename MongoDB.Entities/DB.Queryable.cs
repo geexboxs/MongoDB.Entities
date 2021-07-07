@@ -1,4 +1,6 @@
-﻿using MongoDB.Driver;
+﻿using System.Linq;
+
+using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace MongoDB.Entities
@@ -13,9 +15,25 @@ namespace MongoDB.Entities
         /// <typeparam name="T">Any class that implements IEntity</typeparam>
         public static IMongoQueryable<T> Queryable<T>(AggregateOptions options = null, IClientSessionHandle session = null) where T : IEntity
         {
-            return session == null
+
+            var result = session == null
                    ? Collection<T>().AsQueryable(options)
                    : Collection<T>().AsQueryable(session, options);
+
+            if (DataFilters.Any())
+            {
+                foreach (var (targetType, value) in DataFilters)
+                {
+                    if (targetType.IsAssignableFrom(typeof(T)))
+                    {
+                        var filter = new ExpressionFilterDefinition<T>(x => true);
+                        value.Apply(filter);
+                        result = result.Where(filter.Expression);
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }
