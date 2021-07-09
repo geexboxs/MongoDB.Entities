@@ -209,7 +209,7 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves a complete entity replacing an existing entity or creating a new one if it does not exist. 
+        /// Saves a complete entity replacing an existing entity or creating a new one if it does not exist.
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is replaced.
         /// </summary>
         /// <param name="session">An optional session if using within a transaction</param>
@@ -220,34 +220,26 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves a batch of complete entities replacing existing ones or creating new ones if they do not exist. 
+        /// Saves a batch of complete entities replacing existing ones or creating new ones if they do not exist.
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is replaced.
         /// </summary>
         /// <param name="session">An optional session if using within a transaction</param>
         /// <param name="cancellation">An optional cancellation token</param>
-        public static Task<BulkWriteResult<T>> SaveAsync<T>(this IEnumerable<T> entities, CancellationToken cancellation = default) where T : IEntity
+        public static Task<BulkWriteResult<T>> SaveAsync<T>(this List<T> entities, IClientSessionHandle session = null, CancellationToken cancellation = default) where T : IEntity
         {
-            IClientSessionHandle session = null;
-            if (entities is Many<T> many)
+            session ??= entities.FirstOrDefault()?.Session;
+            if (entities.Any(x => x.Session != entities.FirstOrDefault()?.Session))
             {
-                session = many.parent?.Session;
+                throw new InvalidOperationException("bulksave entities should be in the same session");
             }
-            else
-            {
-                session = entities.FirstOrDefault()?.Session;
-                if (entities.Any(x => x.Session != entities.FirstOrDefault()?.Session))
-                {
-                    throw new InvalidOperationException("bulksave entities should be in the same session");
-                }
-            }
-            var enumerable = entities.ToList();
-            return DB.SaveAsync(enumerable, session, cancellation);
+
+            return DB.SaveAsync(entities, session, cancellation);
         }
 
         /// <summary>
-        /// Saves an entity partially with only the specified subset of properties. 
+        /// Saves an entity partially with only the specified subset of properties.
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is updated.
-        /// <para>TIP: The properties to be saved can be specified with a 'New' expression. 
+        /// <para>TIP: The properties to be saved can be specified with a 'New' expression.
         /// You can only specify root level properties with the expression.</para>
         /// </summary>
         /// <typeparam name="T">Any class that implements IEntity</typeparam>
@@ -261,9 +253,9 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves a batch of entities partially with only the specified subset of properties. 
+        /// Saves a batch of entities partially with only the specified subset of properties.
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is updated.
-        /// <para>TIP: The properties to be saved can be specified with a 'New' expression. 
+        /// <para>TIP: The properties to be saved can be specified with a 'New' expression.
         /// You can only specify root level properties with the expression.</para>
         /// </summary>
         /// <typeparam name="T">Any class that implements IEntity</typeparam>
@@ -278,9 +270,9 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves an entity partially excluding the specified subset of properties. 
+        /// Saves an entity partially excluding the specified subset of properties.
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is updated.
-        /// <para>TIP: The properties to be excluded can be specified with a 'New' expression. 
+        /// <para>TIP: The properties to be excluded can be specified with a 'New' expression.
         /// You can only specify root level properties with the expression.</para>
         /// </summary>
         /// <typeparam name="T">Any class that implements IEntity</typeparam>
@@ -294,9 +286,9 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves a batch of entities partially excluding the specified subset of properties. 
+        /// Saves a batch of entities partially excluding the specified subset of properties.
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is updated.
-        /// <para>TIP: The properties to be excluded can be specified with a 'New' expression. 
+        /// <para>TIP: The properties to be excluded can be specified with a 'New' expression.
         /// You can only specify root level properties with the expression.</para>
         /// </summary>
         /// <typeparam name="T">Any class that implements IEntity</typeparam>
@@ -311,7 +303,7 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves an entity partially while excluding some properties. 
+        /// Saves an entity partially while excluding some properties.
         /// The properties to be excluded can be specified using the [Preserve] attribute.
         /// </summary>
         /// <typeparam name="T">Any class that implements IEntity</typeparam>

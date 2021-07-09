@@ -1,5 +1,6 @@
 ﻿using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -428,6 +429,7 @@ namespace MongoDB.Entities
         /// <param name="cancellation">An optional cancellation token</param>
         public Task AddAsync(TChild child, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
+            session ??= parent.Session;
             return AddAsync(child.Id, session, cancellation);
         }
 
@@ -440,6 +442,8 @@ namespace MongoDB.Entities
         /// <param name="cancellation">An optional cancellation token</param>
         public Task AddAsync(IEnumerable<TChild> children, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
+            session ??= parent.Session;
+            session.Attach(children);
             return AddAsync(children.Select(c => c.Id), session, cancellation);
         }
 
@@ -452,6 +456,7 @@ namespace MongoDB.Entities
         /// <param name="cancellation">An optional cancellation token</param>
         public Task AddAsync(string childId, IClientSessionHandle session = null, CancellationToken cancellation = default)
         {
+            session ??= parent.Session;
             return AddAsync(new[] { childId }, session, cancellation);
         }
 
