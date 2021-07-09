@@ -1,4 +1,6 @@
-﻿using MongoDB.Driver;
+﻿using System;
+
+using MongoDB.Driver;
 
 namespace MongoDB.Entities
 {
@@ -13,6 +15,7 @@ namespace MongoDB.Entities
         /// </summary>
         string Id { get; set; }
         IClientSessionHandle Session { get; set; }
+        DateTime CreatedOn { get; set; }
 
         /// <summary>
         /// Generate and return a new Id string from this method. It will be used when saving new entities that don't have their Id set. 

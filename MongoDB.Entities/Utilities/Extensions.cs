@@ -376,15 +376,6 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Returns an atomically generated sequential number for the given Entity type everytime the method is called
-        /// </summary>
-        /// <typeparam name="T">The type of entity to get the next sequential number for</typeparam>
-        public static Task<ulong> NextSequentialNumberAsync<T>(this T _) where T : IEntity
-        {
-            return DB.NextSequentialNumberAsync<T>();
-        }
-
-        /// <summary>
         /// Initializes supplied property with a new One-To-Many relationship.
         /// </summary>
         /// <param name="parent"></param>

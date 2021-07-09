@@ -221,8 +221,7 @@ namespace MongoDB.Entities
             if (string.IsNullOrEmpty(entity.Id))
             {
                 entity.Id = entity.GenerateNewId();
-                if (entity is ICreatedOn createdOn)
-                    createdOn.CreatedOn = DateTime.UtcNow;
+                entity.CreatedOn = DateTime.UtcNow;
             }
 
             if (entity is IModifiedOn modifiedOn)

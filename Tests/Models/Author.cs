@@ -3,7 +3,7 @@
 namespace MongoDB.Entities.Tests
 {
     [Name("Writer")]
-    public class Author : Entity, IModifiedOn, ICreatedOn
+    public class Author : Entity, IModifiedOn
     {
         public string Name { get; set; }
         public string Surname { get; set; }
@@ -30,8 +30,6 @@ namespace MongoDB.Entities.Tests
         public string BookIds { get; set; }
 
         public DateTime ModifiedOn { get; set; }
-
-        public DateTime CreatedOn { get; set; }
 
         public Author() => this.InitOneToMany(x => Books);
     }

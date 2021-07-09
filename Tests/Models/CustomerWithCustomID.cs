@@ -10,6 +10,7 @@ namespace MongoDB.Entities.Tests.Models
         public string Id { get; set; }
 
         IClientSessionHandle IEntity.Session { get; set; }
+        public DateTime CreatedOn { get; set; }
 
         public string GenerateNewId()
             => $"{Guid.NewGuid()}-{DateTime.UtcNow.Ticks}";

@@ -41,7 +41,7 @@ namespace MongoDB.Entities
         public DbContext(string database = default, bool transactional = false, ClientSessionOptions options = null)
         {
             session = DB.Database(database).Client.StartSession(options);
-            Session.StartTransaction();
+            Session.StartTransaction(new TransactionOptions(new Optional<ReadConcern>(ReadConcern.Local)));
         }
 
         /// <summary>
@@ -265,9 +265,9 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves an entity partially with only the specified subset of properties. 
+        /// Saves an entity partially with only the specified subset of properties.
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is updated.
-        /// <para>TIP: The properties to be saved can be specified with a 'New' expression. 
+        /// <para>TIP: The properties to be saved can be specified with a 'New' expression.
         /// You can only specify root level properties with the expression.</para>
         /// </summary>
         /// <typeparam name="T">Any class that implements IEntity</typeparam>
@@ -281,9 +281,9 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves a batch of entities partially with only the specified subset of properties. 
+        /// Saves a batch of entities partially with only the specified subset of properties.
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is updated.
-        /// <para>TIP: The properties to be saved can be specified with a 'New' expression. 
+        /// <para>TIP: The properties to be saved can be specified with a 'New' expression.
         /// You can only specify root level properties with the expression.</para>
         /// </summary>
         /// <typeparam name="T">Any class that implements IEntity</typeparam>
@@ -297,9 +297,9 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves an entity partially excluding the specified subset of properties. 
+        /// Saves an entity partially excluding the specified subset of properties.
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is updated.
-        /// <para>TIP: The properties to be excluded can be specified with a 'New' expression. 
+        /// <para>TIP: The properties to be excluded can be specified with a 'New' expression.
         /// You can only specify root level properties with the expression.</para>
         /// </summary>
         /// <typeparam name="T">Any class that implements IEntity</typeparam>
@@ -313,9 +313,9 @@ namespace MongoDB.Entities
         }
 
         /// <summary>
-        /// Saves a batch of entities partially excluding the specified subset of properties. 
+        /// Saves a batch of entities partially excluding the specified subset of properties.
         /// If Id value is null, a new entity is created. If Id has a value, then existing entity is updated.
-        /// <para>TIP: The properties to be excluded can be specified with a 'New' expression. 
+        /// <para>TIP: The properties to be excluded can be specified with a 'New' expression.
         /// You can only specify root level properties with the expression.</para>
         /// </summary>
         /// <typeparam name="T">Any class that implements IEntity</typeparam>

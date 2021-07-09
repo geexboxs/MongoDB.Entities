@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using System;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 
@@ -16,6 +17,7 @@ namespace MongoDB.Entities
         public string Id { get; set; }
 
         IClientSessionHandle IEntity.Session { get; set; }
+        public DateTime CreatedOn { get; set; }
 
         /// <summary>
         /// Override this method in order to control the generation of Ids for new entities.

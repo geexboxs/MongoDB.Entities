@@ -201,33 +201,5 @@ namespace MongoDB.Entities.Tests
 
             Assert.AreEqual(321, res.OtherAuthors[0].Age);
         }
-
-        [TestMethod]
-        public async Task next_sequential_number_for_entities()
-        {
-            var book = new Book();
-
-            var lastNum = await book.NextSequentialNumberAsync();
-
-            var bookNum = 0ul;
-            Parallel.For(1, 11, _ => bookNum = book.NextSequentialNumberAsync().GetAwaiter().GetResult());
-
-            Assert.AreEqual(lastNum + 10, (await book.NextSequentialNumberAsync()) - 1);
-        }
-
-        [TestMethod]
-        public async Task next_sequential_number_for_entities_multidb()
-        {
-            await DB.InitAsync("mongodb-entities-test-multi");
-
-            var img = new Image();
-
-            var lastNum = await img.NextSequentialNumberAsync();
-
-            var imgNum = 0ul;
-            Parallel.For(1, 11, _ => imgNum = img.NextSequentialNumberAsync().GetAwaiter().GetResult());
-
-            Assert.AreEqual(lastNum + 10, await img.NextSequentialNumberAsync() - 1);
-        }
     }
 }
