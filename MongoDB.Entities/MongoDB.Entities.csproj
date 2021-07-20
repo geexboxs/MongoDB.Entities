@@ -42,6 +42,6 @@
     <None Include="..\icon.png" Pack="true" PackagePath="\" />
   </ItemGroup>
   <Target Name="CopyPackage" AfterTargets="Pack">
-    <Exec Command="nuget add $(ProjectDir)bin\$(Configuration)\$(PackageId).$(PackageVersion).nupkg -source $(SolutionDir)..\..\nuget" />
+    <Exec Command="nuget add $(ProjectDir)bin\$(Configuration)\$(PackageId).$(PackageVersion).nupkg -source $(SolutionDir)..\nuget" />
   </Target>
 </Project>
